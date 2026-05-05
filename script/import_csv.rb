@@ -1,10 +1,13 @@
 require 'csv'
 
-FILEPATH = '購買記録.csv'
+FILEPATH = 'data/購買記録.csv'
 
 category_caches = {}
 
 ActiveRecord::Base.transaction do
+  Trade.update_all(trade_category_id: nil)
+  TradeCategory.delete_all
+
   preset_categories = %w[Steam Kindle まんが王国 iOSアプリ Androidアプリ ふるさと納税 Udemy mora e-onkyo iTunes Xbox360 Wii]
   preset_categories.each do |category|
     next if TradeCategory.find_by(name: category).present?
@@ -12,6 +15,8 @@ ActiveRecord::Base.transaction do
     trade_category = TradeCategory.create!(name: category)
     category_caches[category] = trade_category
   end
+
+  Trade.delete_all
 
   CSV.foreach(FILEPATH, headers: :first_row) do |line|
     trade = Trade.new
@@ -36,6 +41,8 @@ ActiveRecord::Base.transaction do
         if !category.nil?
           category_caches[remarks] = category
           trade.category = category
+        else
+          trade.remarks = remarks
         end
       end
     end
