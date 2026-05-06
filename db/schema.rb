@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_04_091217) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_06_010552) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -20,6 +20,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_091217) do
     t.bigint "parent_id", comment: "親"
     t.datetime "updated_at", null: false
     t.index ["parent_id"], name: "index_trade_categories_on_parent_id"
+  end
+
+  create_table "trade_category_inheritances", force: :cascade do |t|
+    t.bigint "child_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "parent_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["child_id"], name: "index_trade_category_inheritances_on_child_id"
+    t.index ["parent_id", "child_id"], name: "index_trade_category_inheritances_on_parent_id_and_child_id", unique: true
+    t.index ["parent_id"], name: "index_trade_category_inheritances_on_parent_id"
   end
 
   create_table "trades", force: :cascade do |t|
@@ -35,5 +45,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_04_091217) do
   end
 
   add_foreign_key "trade_categories", "trade_categories", column: "parent_id"
+  add_foreign_key "trade_category_inheritances", "trade_categories", column: "child_id"
+  add_foreign_key "trade_category_inheritances", "trade_categories", column: "parent_id"
   add_foreign_key "trades", "trade_categories"
 end
